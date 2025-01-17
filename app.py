@@ -52,6 +52,10 @@ def data_result(protocol, username, expired, output):
 def login():
     return render_template('login.html')
 
+@app.route('/home')
+def home():
+    return run_dashboard_directly()
+
 @app.route('/login', methods=['POST'])
 def do_login():
     username = request.form['username']
