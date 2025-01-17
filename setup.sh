@@ -43,3 +43,6 @@ systemctl enable app.service
 systemctl start app.service
 
 echo "Setup selesai. Service app.service telah berjalan."
+
+cd
+rm setup.sh
