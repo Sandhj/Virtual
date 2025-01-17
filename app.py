@@ -117,6 +117,7 @@ def create_account_temp():
 def create_account():
     if request.method == 'POST':
     # Ambil data dari form
+        device = request.form['device']
         protocol = request.form['protocol']
         username = request.form['username']
         expired = request.form['expired']
@@ -158,6 +159,7 @@ def create_account():
         output = f"Error: {e.stderr.strip()}"
         return render_template(
             'result.html',
+            device=device,
             username=username,
             expired=expired,
             protocol=protocol,
@@ -178,15 +180,16 @@ def create_account():
 @app.route('/result')
 def result():
     # Ambil data yang diterima dari URL dan tampilkan di result.html
+    device = request.args.get('device')
     username = request.args.get('username')
     expired = request.args.get('expired')
     protocol = request.args.get('protocol')
     output = request.args.get('output')
 
     # Tentukan harga berdasarkan protokol
-    if protocol.lower() == "hp":
+    if device.lower() == "hp":
         price = "5.000"
-    elif protocol.lower() == "stb":
+    elif device.lower() == "stb":
         price = "10.000"
     else:
         price = "0"
@@ -203,6 +206,7 @@ def result():
         username=username,
         expired=expired,
         protocol=protocol,
+        device=device,
         output=output,
         wa_link=wa_link,
         price=price
