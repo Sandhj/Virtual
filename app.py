@@ -182,12 +182,29 @@ def result():
     protocol = request.args.get('protocol')
     output = request.args.get('output')
 
+    # Tentukan harga berdasarkan protokol
+    if protocol.lower() == "hp":
+        price = "5.000"
+    elif protocol.lower() == "stb":
+        price = "10.000"
+    else:
+        price = "0"
+
+    # Pesan untuk WhatsApp
+    wa_message = f"Selesaikan Pembayaran:\nProtokol: {protocol}\nUsername: {username}\nExpired: {expired}\nSebesar: {price}"
+
+    # Encode pesan untuk URL WhatsApp
+    wa_encoded_message = urllib.parse.quote(wa_message)
+    wa_link = f"https://wa.me/6285155208019?text={wa_encoded_message}"  # Ganti <admin_number> dengan nomor admin
+
     return render_template(
         'result.html',
         username=username,
         expired=expired,
         protocol=protocol,
-        output=output
+        output=output,
+        wa_link=wa_link,
+        price=price
     )
 
 
