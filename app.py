@@ -98,9 +98,12 @@ def dashboard():
     return render_template('dashboard.html')
 
 # ---------------Fungsi Create Account------------&
-@app.route('/create_temp', methods=['GET'])
+@app.route('/create_temp', methods=['GET', 'POST'])
 def create_account_temp():
-    return render_template('create.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        return render_template('create.html')
     
 @app.route('/create', methods=['POST'])
 def create_account():
