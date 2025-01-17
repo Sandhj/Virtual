@@ -126,7 +126,7 @@ def create_account():
         )
 
     # Membaca file output yang dihasilkan oleh skrip shell
-    output_file = f"/root/Virtual/{username}_output.txt"
+    output_file = f"/root/project/{username}_output.txt"
     if os.path.exists(output_file):
         with open(output_file, 'r') as file:
             output = file.read()
@@ -197,7 +197,7 @@ def renew_account():
         )
 
     # Membaca file output yang dihasilkan oleh skrip shell
-    output_file = f"/root/Virtual/{username}_output.txt"
+    output_file = f"/root/project/{username}_output.txt"
     if os.path.exists(output_file):
         with open(output_file, 'r') as file:
             output = file.read()
