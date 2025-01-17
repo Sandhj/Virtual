@@ -66,21 +66,32 @@
       font-size: 0.9rem;
       margin-bottom: 15px;
     }
-    .dashboard-card a {
-      display: inline-block;
-      padding: 10px 20px;
-      border: 1px solid #3b82f6;
-      border-radius: 5px;
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.3s, color 0.3s;
+    .dashboard-card button {
+      background-color: #007BFF; /* Warna biru */
+      color: #FFFFFF; /* Warna teks putih */
+      border: none; /* Hilangkan border default */
+      border-radius: 4px; /* Ujung tombol melengkung */
+     padding: 10px 20px; /* Ruang dalam tombol */
+     font-size: 16px; /* Ukuran font */
+     cursor: pointer; /* Ubah kursor menjadi pointer */
+     transition: background-color 0.3s ease; /* Animasi transisi */
     }
-    .dashboard-card a:hover {
-      background: #3b82f6;
-      color: #fff;
+    .dashboard-card button:hover {
+      background-color: #0056b3; /* Warna biru lebih gelap saat hover */
     }
-    .footer {
+    .dashboard-card button:focus {
+      outline: 2px solid #0056b3; /* Outline fokus untuk aksesibilitas */
+      outline-offset: 2px;
+    }
+    .dashboard-card button:active {
+      background-color: #003d80; /* Warna biru lebih gelap saat diklik */
+    }
+    .dashboard-card button:disabled {
+      background-color: #d6d6d6; /* Warna abu-abu untuk tombol nonaktif */
+      cursor: not-allowed;
+      color: #8c8c8c;
+    }
+   .footer {
       margin-top: 40px;
       text-align: center;
       font-size: 0.9rem;
