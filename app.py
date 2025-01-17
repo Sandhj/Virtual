@@ -74,11 +74,13 @@ def dashboard():
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_account():
-    # Memeriksa apakah pengguna sudah menyelesaikan pengisian form
-    if 'account_created' in session and session['account_created']:
-        return redirect(url_for('home'))
+    # Cek apakah sesi "form_submitted" ada
+    if not session.get('form_submitted'):
+        return redirect(url_for('dashboard'))  # Redirect ke halaman home jika tidak ada sesi
 
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('create.html')  # Menampilkan form pembuatan akun
+    elif request.method == 'POST':
         # Ambil data dari form
         protocol = request.form['protocol']
         username = request.form['username']
@@ -100,7 +102,7 @@ def create_account():
                 capture_output=True,
                 check=True
             )
-
+            
             # Jika berhasil, outputnya akan ditangkap oleh result.stdout
             print(f"Script output: {result.stdout.strip()}")
 
@@ -114,9 +116,6 @@ def create_account():
             <b>Expired:</b> {expired} days
             """
             send_telegram_notification(telegram_token, chat_id, message)
-
-            # Menyimpan status bahwa akun telah dibuat di session
-            session['account_created'] = True
 
         except subprocess.CalledProcessError as e:
             # Tangkap kesalahan jika terjadi error pada eksekusi skrip shell
@@ -139,25 +138,34 @@ def create_account():
             # Menghapus file output setelah dibaca
             os.remove(output_file)
 
-        # Render halaman hasil
-        return render_template(
-            'result.html',
-            username=username,
-            expired=expired,
-            protocol=protocol,
-            output=output
-        )
+        # Redirect setelah POST untuk menghindari refresh dan menjalankan ulang
+        session.pop('form_submitted', None)  # Hapus sesi setelah form disubmit
+        return redirect(url_for('result', username=username, expired=expired, protocol=protocol, output=output))
 
-    # Jika metode GET, langsung tampilkan form
-    return render_template('create.html')
+@app.route('/result')
+def result():
+    username = request.args.get('username')
+    expired = request.args.get('expired')
+    protocol = request.args.get('protocol')
+    output = request.args.get('output')
+    
+    return render_template(
+        'result.html',
+        username=username,
+        expired=expired,
+        protocol=protocol,
+        output=output
+    )
 
 @app.route('/renew', methods=['GET', 'POST'])
 def renew_account():
-    # Memeriksa apakah pengguna sudah menyelesaikan pengisian form
-    if 'account_created' in session and session['account_created']:
-        return redirect(url_for('home'))
+    # Cek apakah sesi "form_submitted" ada
+    if not session.get('form_submitted'):
+        return redirect(url_for('dashboard'))  # Redirect ke halaman home jika tidak ada sesi
 
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('create.html')  # Menampilkan form pembuatan akun
+    elif request.method == 'POST':
         # Ambil data dari form
         protocol = request.form['protocol']
         username = request.form['username']
@@ -179,7 +187,7 @@ def renew_account():
                 capture_output=True,
                 check=True
             )
-
+            
             # Jika berhasil, outputnya akan ditangkap oleh result.stdout
             print(f"Script output: {result.stdout.strip()}")
 
@@ -193,9 +201,6 @@ def renew_account():
             <b>Expired:</b> {expired} days
             """
             send_telegram_notification(telegram_token, chat_id, message)
-
-            # Menyimpan status bahwa akun telah dibuat di session
-            session['account_created'] = True
 
         except subprocess.CalledProcessError as e:
             # Tangkap kesalahan jika terjadi error pada eksekusi skrip shell
@@ -218,17 +223,24 @@ def renew_account():
             # Menghapus file output setelah dibaca
             os.remove(output_file)
 
-        # Render halaman hasil
-        return render_template(
-            'result.html',
-            username=username,
-            expired=expired,
-            protocol=protocol,
-            output=output
-        )
+        # Redirect setelah POST untuk menghindari refresh dan menjalankan ulang
+        session.pop('form_submitted', None)  # Hapus sesi setelah form disubmit
+        return redirect(url_for('result', username=username, expired=expired, protocol=protocol, output=output))
 
-    # Jika metode GET, langsung tampilkan form
-    return render_template('create.html')
+@app.route('/result')
+def result():
+    username = request.args.get('username')
+    expired = request.args.get('expired')
+    protocol = request.args.get('protocol')
+    output = request.args.get('output')
+    
+    return render_template(
+        'result.html',
+        username=username,
+        expired=expired,
+        protocol=protocol,
+        output=output
+    )
 
 def send_telegram_notification(token, chat_id, message):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
