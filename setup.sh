@@ -15,31 +15,23 @@ pip isntall requests
 deactivate
 
 cd
-# Direktori proyek
-PROJECT_DIR="/root/project"
-VENV_DIR="$PROJECT_DIR/web"
-APP_FILE="$PROJECT_DIR/app.py"
-SERVICE_FILE="/etc/systemd/system/app.service"
-
-# Buat file systemd service
-echo "Membuat file service di $SERVICE_FILE..."
-cat <<EOL > $SERVICE_FILE
+cat <<EOL > /etc/systemd/system/app.service
 [Unit]
-Description=Python Web Application Service
+Description=Flask App
 After=network.target
 
 [Service]
-User=www-data
-Group=www-data
-WorkingDirectory=$PROJECT_DIR
-ExecStart=$VENV_DIR/bin/python $APP_FILE
+User=root
+WorkingDirectory=/root/project
+ExecStart=/root/project/venv/bin/python /root/project/app.py
 Restart=always
-RestartSec=5
-Environment="PATH=$VENV_DIR/bin"
-Environment="VIRTUAL_ENV=$VENV_DIR"
+Environment="PATH=/root/project/venv/bin"
+Environment="VIRTUAL_ENV=/root/project/venv"
+Environment="FLASK_APP=/root/project/app.py"
 
 [Install]
 WantedBy=multi-user.target
+
 EOL
 
 # Reload systemd dan aktifkan service
@@ -48,7 +40,6 @@ systemctl daemon-reload
 systemctl enable app.service
 
 # Menjalankan service
-echo "Menjalankan service..."
 systemctl start app.service
 
 echo "Setup selesai. Service app.service telah berjalan."
