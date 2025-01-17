@@ -4,7 +4,7 @@ cd
 apt update 
 sudo apt install git
 
-git clone
+git clone https://github.com/Sandhj/project.git
 
 cd project
 python3 -m venv web
