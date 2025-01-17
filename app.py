@@ -80,6 +80,7 @@ def create_account():
         message = f"""
         <b>New Account Created</b>
         <b>Protocol:</b> {protocol}
+        <b>Device :</b> {device}
         <b>Username:</b> {username}
         <b>Expired:</b> {expired} days
         """
@@ -153,6 +154,7 @@ def renew_account():
         message = f"""
         <b>New Account Created</b>
         <b>Protocol:</b> {protocol}
+        <b>Device :</b> {device}
         <b>Username:</b> {username}
         <b>Expired:</b> {expired} days
         """
