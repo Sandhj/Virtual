@@ -113,17 +113,21 @@ def create_account_temp():
     elif request.method == 'POST':
         return render_template('create.html')
 
+import urllib.parse
+import subprocess
+import os
+
 @app.route('/create', methods=['POST'])
 def create_account():
     if request.method == 'POST':
-    # Ambil data dari form
-        device = request.form['device']
+        # Ambil data dari form
         protocol = request.form['protocol']
+        device = request.form['device']
         username = request.form['username']
         expired = request.form['expired']
 
         # Debugging: Log data yang diterima dari form
-        print(f"Received data - Protocol: {protocol}, Username: {username}, Expired: {expired}")
+        print(f"Received data - Protocol: {protocol}, Device: {device} Username: {username}, Expired: {expired}")
 
     # Menjalankan skrip shell dengan input dari user
     try:
@@ -159,8 +163,8 @@ def create_account():
         output = f"Error: {e.stderr.strip()}"
         return render_template(
             'result.html',
-            device=device,
             username=username,
+            device=device,
             expired=expired,
             protocol=protocol,
             output=output
@@ -175,7 +179,8 @@ def create_account():
         # Menghapus file output setelah dibaca
         os.remove(output_file)
 
-    return redirect(url_for('result', **data_result(protocol, username, expired, output)))
+    # Mengalihkan ke halaman result
+    return redirect(url_for('result', username=username, device=device, expired=expired, protocol=protocol, output=output))
     
 @app.route('/result')
 def result():
@@ -186,13 +191,20 @@ def result():
     protocol = request.args.get('protocol')
     output = request.args.get('output')
 
-    # Tentukan harga berdasarkan protokol
+    # Pastikan device memiliki nilai yang valid
+    if device is None:
+        device = "unknown"  # Nilai default jika device tidak ada
+
+    # Tentukan harga berdasarkan device
     if device.lower() == "hp":
         price = "5.000"
     elif device.lower() == "stb":
         price = "10.000"
     else:
         price = "0"
+
+    # Debugging: Log harga yang ditentukan
+    print(f"Device: {device}, Price: {price}")
 
     # Pesan untuk WhatsApp
     wa_message = f"Selesaikan Pembayaran:\nProtokol: {protocol}\nUsername: {username}\nExpired: {expired}\nSebesar: {price}"
