@@ -5,7 +5,7 @@ import subprocess
 import requests
 
 app = Flask(__name__)
-app.secret_key = '4b3403665fea6a6b5e9f0ed7f0c3e4d2'
+app.secret_key = os.urandom(24)
 
 # File untuk menyimpan data pengguna
 DATA_FILE = 'data.json'
