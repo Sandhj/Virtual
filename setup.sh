@@ -11,7 +11,7 @@ python3 -m venv web
 source web/bin/activate
 
 pip install flask
-pip isntall requests
+pip install requests
 deactivate
 
 cd
