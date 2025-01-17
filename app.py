@@ -93,16 +93,19 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
-    return render_template('dashboard.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        return render_template('dashboard.html')
 
 # ---------------Fungsi Create Account------------&
-@app.route('/create_temp', methods=['GET', 'POST'])
+@app.route('/create_temp', methods=['GET'])
 def create_account_temp():
     if request.method == 'GET':
         return render_template('login.html')
-    elif request.method == 'POST':
+    else:
         return render_template('create.html')
     
 @app.route('/create', methods=['POST'])
