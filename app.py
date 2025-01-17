@@ -8,9 +8,6 @@ import urllib.parse
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# File untuk menyimpan data pengguna
-DATA_FILE = 'data.json'
-
 #Fungsi kirim Data ke Bot Tele
 def send_telegram_notification(token, chat_id, message):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -26,18 +23,6 @@ def send_telegram_notification(token, chat_id, message):
     except Exception as e:
         print(f"Error sending Telegram notification: {e}")
 
-# Fungsi untuk membaca data pengguna
-def load_users():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, 'r') as file:
-        return json.load(file)
-
-# Fungsi untuk menyimpan data pengguna
-def save_users(users):
-    with open(DATA_FILE, 'w') as file:
-        json.dump(users, file)
-
 # Fungsi untuk mengambil data result
 def data_result(protocol, username, expired, output):
     return {
@@ -50,64 +35,7 @@ def data_result(protocol, username, expired, output):
 # ------------------Funsgi awal web------------------
 @app.route('/')
 def login():
-    return render_template('login.html')
-
-@app.route('/home')
-def home():
-    return run_dashboard_directly()
-
-@app.route('/login', methods=['POST'])
-def do_login():
-    username = request.form['username']
-    password = request.form['password']
-
-    users = load_users()
-    user = next((user for user in users if user['username'] == username and user['password'] == password), None)
-
-    if user:
-        flash("Login berhasil!", "success")
-        return run_dashboard_directly()
-    else:
-        flash("Username atau password salah!", "danger")
-        return redirect(url_for('login'))
-    
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-
-        if not username or not password or not confirm_password:
-            flash("Semua kolom harus diisi!", "danger")
-            return redirect(url_for('register'))
-
-        if password != confirm_password:
-            flash("Password dan konfirmasi password tidak cocok!", "danger")
-            return redirect(url_for('register'))
-
-        users = load_users()
-        if any(user['username'] == username for user in users):
-            flash("Username sudah terdaftar!", "danger")
-            return redirect(url_for('register'))
-
-        users.append({'username': username, 'password': password})
-        save_users(users)
-        flash("Registrasi berhasil! Silakan login.", "success")
-        return redirect(url_for('login'))
-
-    return render_template('register.html')
-
-def run_dashboard_directly():
-    response = dashboard()
-    return response
-    
-@app.route('/dashboard', methods=['GET'])
-def dashboard():
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
-        return render_template('dashboard.html')
+    return render_template('dashboard.html')
 
 # ---------------Fungsi Create Account------------
 @app.route('/create_temp', methods=['GET', 'POST'])
