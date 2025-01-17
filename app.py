@@ -98,12 +98,13 @@ def dashboard():
     return render_template('dashboard.html')
 
 # ---------------Fungsi Create Account------------&
-
-@app.route('/create', methods=['GET', 'POST'])
+@app.route('/create_temp', methods=['GET'])
+def create_account_temp():
+    return render_template('create.html')
+    
+@app.route('/create', methods=['POST'])
 def create_account():
-    if request.method == 'GET':
-        return render_template('create.html')  # Menggunakan create.html untuk form
-    elif request.method == 'POST':
+    if request.method == 'POST':
     # Ambil data dari form
         protocol = request.form['protocol']
         username = request.form['username']
