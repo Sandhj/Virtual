@@ -61,7 +61,7 @@ def do_login():
 
     if user:
         flash("Login berhasil!", "success")
-        return redirect(url_for('dashboard'))
+        return run_dashboard_directly()
     else:
         flash("Username atau password salah!", "danger")
         return redirect(url_for('login'))
@@ -93,6 +93,10 @@ def register():
 
     return render_template('register.html')
 
+def run_dashboard_directly():
+    response = dashboard()
+    return response
+    
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     if request.method == 'GET':
@@ -101,6 +105,10 @@ def dashboard():
         return render_template('dashboard.html')
 
 # ---------------Fungsi Create Account------------&
+def create_account_temp_directly():
+    response = dashboard()
+    return response
+    
 @app.route('/create_temp', methods=['GET'])
 def create_account_temp():
     if request.method == 'GET':
