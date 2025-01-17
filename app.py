@@ -104,21 +104,19 @@ def dashboard():
     else:
         return render_template('dashboard.html')
 
-# ---------------Fungsi Create Account------------&
-def create_account_temp_directly():
-    response = dashboard()
-    return response
-    
-@app.route('/create_temp', methods=['GET'])
+# ---------------Fungsi Create Account------------
+@app.route('/create_temp', methods=['GET', 'POST'])
 def create_account_temp():
     if request.method == 'GET':
         return render_template('login.html')
-    else:
+    elif request.method == 'POST':
         return render_template('create.html')
-    
-@app.route('/create', methods=['POST'])
+
+@app.route('/create', methods=['GET', 'POST'])
 def create_account():
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('create.html')
+    elif request.method == 'POST':
     # Ambil data dari form
         protocol = request.form['protocol']
         username = request.form['username']
