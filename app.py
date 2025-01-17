@@ -76,7 +76,7 @@ def dashboard():
 def create_account():
     # Cek apakah sesi "form_submitted" ada
     if not session.get('form_submitted'):
-        return redirect(url_for('dashboard'))  # Redirect ke halaman home jika tidak ada sesi
+        return redirect(url_for('login'))  # Redirect ke halaman home jika tidak ada sesi
 
     if request.method == 'GET':
         return render_template('create.html')  # Menampilkan form pembuatan akun
@@ -142,26 +142,11 @@ def create_account():
         session.pop('form_submitted', None)  # Hapus sesi setelah form disubmit
         return redirect(url_for('result', username=username, expired=expired, protocol=protocol, output=output))
 
-@app.route('/result')
-def result():
-    username = request.args.get('username')
-    expired = request.args.get('expired')
-    protocol = request.args.get('protocol')
-    output = request.args.get('output')
-    
-    return render_template(
-        'result.html',
-        username=username,
-        expired=expired,
-        protocol=protocol,
-        output=output
-    )
-
 @app.route('/renew', methods=['GET', 'POST'])
 def renew_account():
     # Cek apakah sesi "form_submitted" ada
     if not session.get('form_submitted'):
-        return redirect(url_for('dashboard'))  # Redirect ke halaman home jika tidak ada sesi
+        return redirect(url_for('login'))  # Redirect ke halaman home jika tidak ada sesi
 
     if request.method == 'GET':
         return render_template('create.html')  # Menampilkan form pembuatan akun
