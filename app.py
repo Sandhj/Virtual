@@ -10,6 +10,21 @@ app.secret_key = os.urandom(24)
 # File untuk menyimpan data pengguna
 DATA_FILE = 'data.json'
 
+#Fungsi kirim Data ke Bot Tele
+def send_telegram_notification(token, chat_id, message):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML"
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 200:
+            print(f"Failed to send message: {response.text}")
+    except Exception as e:
+        print(f"Error sending Telegram notification: {e}")
+
 # Fungsi untuk membaca data pengguna
 def load_users():
     if not os.path.exists(DATA_FILE):
@@ -22,10 +37,35 @@ def save_users(users):
     with open(DATA_FILE, 'w') as file:
         json.dump(users, file)
 
+# Fungsi untuk mengambil data result
+def data_result(protocol, username, expired, output):
+    return {
+        'username': username,
+        'expired': expired,
+        'protocol': protocol,
+        'output': output
+    }
+
+# ------------------Funsgi awal web------------------
 @app.route('/')
 def login():
     return render_template('login.html')
 
+@app.route('/login', methods=['POST'])
+def do_login():
+    username = request.form['username']
+    password = request.form['password']
+
+    users = load_users()
+    user = next((user for user in users if user['username'] == username and user['password'] == password), None)
+
+    if user:
+        flash("Login berhasil!", "success")
+        return redirect(url_for('dashboard'))
+    else:
+        flash("Username atau password salah!", "danger")
+        return redirect(url_for('login'))
+    
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -53,35 +93,18 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/login', methods=['POST'])
-def do_login():
-    username = request.form['username']
-    password = request.form['password']
-
-    users = load_users()
-    user = next((user for user in users if user['username'] == username and user['password'] == password), None)
-
-    if user:
-        flash("Login berhasil!", "success")
-        return redirect(url_for('dashboard'))
-    else:
-        flash("Username atau password salah!", "danger")
-        return redirect(url_for('login'))
-
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
 
+# ---------------Fungsi Create Account------------&
+
 @app.route('/create', methods=['GET', 'POST'])
 def create_account():
-    # Cek apakah sesi "form_submitted" ada
-    if not session.get('form_submitted'):
-        return redirect(url_for('login'))  # Redirect ke halaman home jika tidak ada sesi
-
     if request.method == 'GET':
-        return render_template('create.html')  # Menampilkan form pembuatan akun
+        return render_template('create.html')  # Menggunakan create.html untuk form
     elif request.method == 'POST':
-        # Ambil data dari form
+    # Ambil data dari form
         protocol = request.form['protocol']
         username = request.form['username']
         expired = request.form['expired']
@@ -89,136 +112,65 @@ def create_account():
         # Debugging: Log data yang diterima dari form
         print(f"Received data - Protocol: {protocol}, Username: {username}, Expired: {expired}")
 
-        # Menjalankan skrip shell dengan input dari user
-        try:
-            # Debugging: Log sebelum menjalankan skrip shell
-            print(f"Running script for protocol: {protocol} with username: {username} and expired: {expired}")
+    # Menjalankan skrip shell dengan input dari user
+    try:
+        # Debugging: Log sebelum menjalankan skrip shell
+        print(f"Running script for protocol: {protocol} with username: {username} and expired: {expired}")
 
-            # Menjalankan skrip shell dengan memberikan input interaktif (username dan expired)
-            result = subprocess.run(
-                [f"/usr/bin/create_{protocol}"],  # Skrip untuk protokol (vmess, vless, trojan)
-                input=f"{username}\n{expired}\n",  # Memberikan input username dan expired
-                text=True,
-                capture_output=True,
-                check=True
-            )
-            
-            # Jika berhasil, outputnya akan ditangkap oleh result.stdout
-            print(f"Script output: {result.stdout.strip()}")
+        # Menjalankan skrip shell dengan memberikan input interaktif (username dan expired)
+        result = subprocess.run(
+            [f"/usr/bin/create_{protocol}"],  # Skrip untuk protokol (vmess, vless, trojan)
+            input=f"{username}\n{expired}\n",  # Memberikan input username dan expired
+            text=True,
+            capture_output=True,
+            check=True
+        )
+        
+        # Jika berhasil, outputnya akan ditangkap oleh result.stdout
+        print(f"Script output: {result.stdout.strip()}")
+        
+        # Kirim notifikasi ke bot Telegram admin
+        telegram_token = "7360190308:AAH79nXyUiU4TRscBtYRLg14WVNfi1q1T1M"
+        chat_id = "576495165"
+        message = f"""
+        <b>New Account Created</b>
+        <b>Protocol:</b> {protocol}
+        <b>Username:</b> {username}
+        <b>Expired:</b> {expired} days
+        """
+        send_telegram_notification(telegram_token, chat_id, message)
+        
+    except subprocess.CalledProcessError as e:
+        # Tangkap kesalahan jika terjadi error pada eksekusi skrip shell
+        print(f"Error: {e.stderr.strip()}")
+        output = f"Error: {e.stderr.strip()}"
+        return render_template(
+            'result.html',
+            username=username,
+            expired=expired,
+            protocol=protocol,
+            output=output
+        )
 
-            # Kirim notifikasi ke bot Telegram admin
-            telegram_token = "7360190308:AAH79nXyUiU4TRscBtYRLg14WVNfi1q1T1M"
-            chat_id = "576495165"
-            message = f"""
-            <b>New Account Created</b>
-            <b>Protocol:</b> {protocol}
-            <b>Username:</b> {username}
-            <b>Expired:</b> {expired} days
-            """
-            send_telegram_notification(telegram_token, chat_id, message)
+    # Membaca file output yang dihasilkan oleh skrip shell
+    output_file = f"/root/project/{username}_output.txt"
+    if os.path.exists(output_file):
+        with open(output_file, 'r') as file:
+            output = file.read()
 
-        except subprocess.CalledProcessError as e:
-            # Tangkap kesalahan jika terjadi error pada eksekusi skrip shell
-            print(f"Error: {e.stderr.strip()}")
-            output = f"Error: {e.stderr.strip()}"
-            return render_template(
-                'result.html',
-                username=username,
-                expired=expired,
-                protocol=protocol,
-                output=output
-            )
+        # Menghapus file output setelah dibaca
+        os.remove(output_file)
 
-        # Membaca file output yang dihasilkan oleh skrip shell
-        output_file = f"/root/project/{username}_output.txt"
-        if os.path.exists(output_file):
-            with open(output_file, 'r') as file:
-                output = file.read()
-
-            # Menghapus file output setelah dibaca
-            os.remove(output_file)
-
-        # Redirect setelah POST untuk menghindari refresh dan menjalankan ulang
-        session.pop('form_submitted', None)  # Hapus sesi setelah form disubmit
-        return redirect(url_for('result', username=username, expired=expired, protocol=protocol, output=output))
-
-@app.route('/renew', methods=['GET', 'POST'])
-def renew_account():
-    # Cek apakah sesi "form_submitted" ada
-    if not session.get('form_submitted'):
-        return redirect(url_for('login'))  # Redirect ke halaman home jika tidak ada sesi
-
-    if request.method == 'GET':
-        return render_template('create.html')  # Menampilkan form pembuatan akun
-    elif request.method == 'POST':
-        # Ambil data dari form
-        protocol = request.form['protocol']
-        username = request.form['username']
-        expired = request.form['expired']
-
-        # Debugging: Log data yang diterima dari form
-        print(f"Received data - Protocol: {protocol}, Username: {username}, Expired: {expired}")
-
-        # Menjalankan skrip shell dengan input dari user
-        try:
-            # Debugging: Log sebelum menjalankan skrip shell
-            print(f"Running script for protocol: {protocol} with username: {username} and expired: {expired}")
-
-            # Menjalankan skrip shell dengan memberikan input interaktif (username dan expired)
-            result = subprocess.run(
-                [f"/usr/bin/create_{protocol}"],  # Skrip untuk protokol (vmess, vless, trojan)
-                input=f"{username}\n{expired}\n",  # Memberikan input username dan expired
-                text=True,
-                capture_output=True,
-                check=True
-            )
-            
-            # Jika berhasil, outputnya akan ditangkap oleh result.stdout
-            print(f"Script output: {result.stdout.strip()}")
-
-            # Kirim notifikasi ke bot Telegram admin
-            telegram_token = "7360190308:AAH79nXyUiU4TRscBtYRLg14WVNfi1q1T1M"
-            chat_id = "576495165"
-            message = f"""
-            <b>New Account Created</b>
-            <b>Protocol:</b> {protocol}
-            <b>Username:</b> {username}
-            <b>Expired:</b> {expired} days
-            """
-            send_telegram_notification(telegram_token, chat_id, message)
-
-        except subprocess.CalledProcessError as e:
-            # Tangkap kesalahan jika terjadi error pada eksekusi skrip shell
-            print(f"Error: {e.stderr.strip()}")
-            output = f"Error: {e.stderr.strip()}"
-            return render_template(
-                'result.html',
-                username=username,
-                expired=expired,
-                protocol=protocol,
-                output=output
-            )
-
-        # Membaca file output yang dihasilkan oleh skrip shell
-        output_file = f"/root/project/{username}_output.txt"
-        if os.path.exists(output_file):
-            with open(output_file, 'r') as file:
-                output = file.read()
-
-            # Menghapus file output setelah dibaca
-            os.remove(output_file)
-
-        # Redirect setelah POST untuk menghindari refresh dan menjalankan ulang
-        session.pop('form_submitted', None)  # Hapus sesi setelah form disubmit
-        return redirect(url_for('result', username=username, expired=expired, protocol=protocol, output=output))
-
+    return redirect(url_for('result', **data_result(protocol, username, expired, output)))
+    
 @app.route('/result')
 def result():
+    # Ambil data yang diterima dari URL dan tampilkan di result.html
     username = request.args.get('username')
     expired = request.args.get('expired')
     protocol = request.args.get('protocol')
     output = request.args.get('output')
-    
+
     return render_template(
         'result.html',
         username=username,
@@ -227,19 +179,6 @@ def result():
         output=output
     )
 
-def send_telegram_notification(token, chat_id, message):
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "HTML"
-    }
-    try:
-        response = requests.post(url, json=payload)
-        if response.status_code != 200:
-            print(f"Failed to send message: {response.text}")
-    except Exception as e:
-        print(f"Error sending Telegram notification: {e}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003)
