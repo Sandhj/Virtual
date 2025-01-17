@@ -17,25 +17,24 @@ deactivate
 cd
 cat <<EOL > /etc/systemd/system/app.service
 [Unit]
-Description=Flask App
+Description=Run project script
 After=network.target
 
 [Service]
-User=root
+ExecStart=/bin/bash /root/project/run.sh
 WorkingDirectory=/root/project
-ExecStart=/root/project/venv/bin/python /root/project/app.py
+User=root
+Group=root
 Restart=always
-Environment="PATH=/root/project/venv/bin"
-Environment="VIRTUAL_ENV=/root/project/venv"
-Environment="FLASK_APP=/root/project/app.py"
+StandardOutput=journal
+StandardError=journal
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-
 EOL
 
 # Reload systemd dan aktifkan service
-echo "Reloading systemd dan mengaktifkan service..."
 systemctl daemon-reload
 systemctl enable app.service
 
