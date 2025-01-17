@@ -184,14 +184,14 @@ def create_account():
 
 
 @app.route('/renew_temp', methods=['GET', 'POST'])
-def create_account_temp():
+def renew_account_temp():
     if request.method == 'GET':
         return render_template('login.html')
     elif request.method == 'POST':
         return render_template('renew.html')
 
 @app.route('/renew', methods=['POST'])
-def create_account():
+def renew_account():
     if request.method == 'POST':
         # Ambil data dari form
         protocol = request.form['protocol']
