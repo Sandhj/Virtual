@@ -41,7 +41,7 @@ def login():
 @app.route('/create_temp', methods=['GET', 'POST'])
 def create_account_temp():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('dashboard.html')
     elif request.method == 'POST':
         return render_template('create.html')
 
@@ -115,7 +115,7 @@ def create_account():
 @app.route('/renew_temp', methods=['GET', 'POST'])
 def renew_account_temp():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('dashboard.html')
     elif request.method == 'POST':
         return render_template('renew.html')
 
