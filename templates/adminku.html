@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 94%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: none;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .package-list {
+            margin-top: 20px;
+        }
+        .package-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .package-item button {
+            width: auto;
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+        }
+        .package-item button:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <div class="input-group">
+            <label for="packageName">Nama Paket</label>
+            <input type="text" id="packageName" placeholder="Masukkan nama paket">
+        </div>
+        <div class="input-group">
+            <label for="packageDetail">Detail Paket</label>
+            <textarea id="packageDetail" rows="5" placeholder="Masukkan detail paket, gunakan Enter untuk baris baru"></textarea>
+        </div>
+        <button onclick="addPackage()">Tambahkan Paket</button>
+
+        <div class="package-list" id="packageList">
+            <!-- Paket akan muncul di sini -->
+        </div>
+    </div>
+
+    <script>
+        function fetchPackages() {
+            fetch('/get_packages')
+                .then(response => response.json())
+                .then(data => {
+                    const packageList = document.getElementById('packageList');
+                    packageList.innerHTML = '';
+                    for (const [name, detail] of Object.entries(data)) {
+                        const packageItem = document.createElement('div');
+                        packageItem.className = 'package-item';
+                        packageItem.innerHTML = `
+                            <div>
+                                <strong>${name}</strong><br>
+                                ${detail.replace(/\n/g, '<br>')}
+                            </div>
+                            <button onclick="deletePackage('${name}')">Hapus</button>
+                        `;
+                        packageList.appendChild(packageItem);
+                    }
+                });
+        }
+
+        function addPackage() {
+            const name = document.getElementById('packageName').value.trim();
+            const detail = document.getElementById('packageDetail').value.trim();
+
+            if (!name || !detail) {
+                alert('Nama paket dan detail wajib diisi!');
+                return;
+            }
+
+            fetch('/add_package', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, detail }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchPackages();
+                });
+        }
+
+        function deletePackage(name) {
+            fetch('/delete_package', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchPackages();
+                });
+        }
+
+        // Fetch packages on page load
+        fetchPackages();
+    </script>
+</body>
+</html>
