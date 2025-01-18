@@ -7,6 +7,7 @@ import urllib.parse
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+packages = {}
 
 #Fungsi kirim Data ke Bot Tele
 def send_telegram_notification(token, chat_id, message):
@@ -226,6 +227,41 @@ def result():
         wa_link=wa_link,
         price=price
     )
+
+# ---------- Fungsi Kuota XL ----------
+@app.route('/dashboard_xl', methods=['POST'])
+def xl():
+    return render_template('dashboard_xl.html')
+
+@app.route('/adminku', methods=['GET'])
+def admin():
+    return render_template('adminku.html')
+
+@app.route('/get_packages', methods=['GET'])
+def get_packages():
+    return jsonify(packages)
+
+@app.route('/add_package', methods=['POST'])
+def add_package():
+    data = request.get_json()
+    name = data.get('name')
+    detail = data.get('detail')
+
+    if not name or not detail:
+        return jsonify({'status': 'error', 'message': 'Nama dan detail wajib diisi!'}), 400
+
+    packages[name] = detail
+    return jsonify({'status': 'success', 'message': f'Paket {name} berhasil ditambahkan!'})
+
+@app.route('/delete_package', methods=['POST'])
+def delete_package():
+    data = request.get_json()
+    name = data.get('name')
+
+    if name in packages:
+        del packages[name]
+        return jsonify({'status': 'success', 'message': f'Paket {name} berhasil dihapus!'})
+    return jsonify({'status': 'error', 'message': 'Paket tidak ditemukan!'}), 404
 
 
 if __name__ == '__main__':
