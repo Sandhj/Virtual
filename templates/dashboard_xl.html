@@ -33,20 +33,39 @@
             margin-bottom: 20px;
         }
         .dropdown {
+            position: relative;
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
         }
         .input-field {
             width: 94%;
             padding: 10px;
-            margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            cursor: pointer;
+        }
+        .package-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            width: 99%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .package-list.active {
+            display: block;
+        }
+        .package-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .package-item:hover {
+            background-color: #f0f0f0;
         }
         .box-detail {
             margin: 20px 0;
@@ -87,10 +106,12 @@
         
         <div>
             <label>List Paket</label>
-            <select id="packageDropdown" class="dropdown" onchange="updateDetail()">
-                <option value="">Pilih Paket</option>
-                <!-- Options akan dimasukkan secara dinamis dari backend -->
-            </select>
+            <div id="dropdown" class="dropdown" onclick="toggleDropdown()">
+                <input type="text" id="packageInput" class="input-field" placeholder="Pilih Paket" readonly />
+                <div id="packageList" class="package-list">
+                    <!-- Daftar paket akan dimasukkan di sini -->
+                </div>
+            </div>
         </div>
 
         <div>
@@ -116,38 +137,43 @@
 
     <script>
         function fetchPackages() {
-            fetch('/get_packages')
+            fetch('/get_packages') // Ganti dengan URL endpoint Anda
                 .then(response => response.json())
                 .then(data => {
-                    const dropdown = document.getElementById('packageDropdown');
-                    dropdown.innerHTML = '<option value="">Pilih Paket</option>'; // Reset options
+                    const packageList = document.getElementById('packageList');
+                    packageList.innerHTML = ''; // Reset list
+
+                    // Tambahkan setiap paket ke dalam daftar
                     for (const [name, detail] of Object.entries(data)) {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        dropdown.appendChild(option);
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('package-item');
+                        listItem.textContent = name;
+                        listItem.onclick = () => selectPackage(name, detail);
+                        packageList.appendChild(listItem);
                     }
                 });
         }
 
-        function updateDetail() {
-            const dropdown = document.getElementById('packageDropdown');
-            const detailBox = document.getElementById('detailBox');
-            const selectedValue = dropdown.value;
+        function toggleDropdown() {
+            const packageList = document.getElementById('packageList');
+            packageList.classList.toggle('active');
+        }
 
-            if (selectedValue) {
-                fetch('/get_packages')
-                    .then(response => response.json())
-                    .then(data => {
-                        detailBox.textContent = data[selectedValue] || "Detail tidak ditemukan.";
-                    });
-            } else {
-                detailBox.textContent = "Detail rincian kuota akan tampil di sini.";
-            }
+        function selectPackage(name, detail) {
+            const inputField = document.getElementById('packageInput');
+            inputField.value = name;
+
+            // Update detail box
+            const detailBox = document.getElementById('detailBox');
+            detailBox.textContent = detail || "Detail tidak ditemukan.";
+
+            // Tutup dropdown setelah pemilihan
+            const packageList = document.getElementById('packageList');
+            packageList.classList.remove('active');
         }
 
         function order() {
-            const packageName = document.getElementById('packageDropdown').value;
+            const packageName = document.getElementById('packageInput').value;
             const phoneNumber = document.getElementById('inputNomorXL').value.trim();
 
             if (!packageName || !phoneNumber) {
