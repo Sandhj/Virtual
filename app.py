@@ -110,9 +110,9 @@ def admin():
         new_password = request.form['new_password']
         add_password(new_password)
         flash('Password berhasil ditambahkan!', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
-    return render_template('admin.html')
+    return render_template('adminadduser.html')
                 
 # ---------------Fungsi Create Account------------
 @app.route('/create_temp', methods=['GET', 'POST'])
