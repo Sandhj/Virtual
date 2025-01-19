@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, flash, jsonify
+from flask import Flask, render_template, flash, jsonify
 import json
 import os
 import subprocess
-import request
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -12,7 +11,7 @@ BACKUP_FILE = 'backup_packages.json'
 PASSWORD_FILE = 'password.txt'
 PASSWORD_EXPIRY_DAYS = 30
 
-@app.route('/dashboard_xl', methods=['POST'])
+@app.route('/') 
 def xl():
     return render_template('dashboard_xl.html')
 
