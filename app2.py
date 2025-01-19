@@ -86,3 +86,6 @@ def restore_packages():
         return jsonify({'error': 'File backup tidak ditemukan.'}), 404
     except Exception as e:
         return jsonify({'error': f'Gagal memulihkan data: {str(e)}'}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5003)
