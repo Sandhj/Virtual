@@ -89,6 +89,22 @@
         .edit-button:hover {
             background-color: #e0a800;
         }
+        button {
+           background-color: #4CAF50; /* Warna latar belakang hijau */
+           color: white; /* Warna teks putih */
+           margin-top: 10px;
+           padding: 14px 20px; /* Padding vertikal 14px dan horizontal 20px */
+           font-size: 16px; /* Ukuran font */
+           border: none; /* Menghapus border */
+           cursor: pointer; /* Menampilkan cursor pointer saat hover */
+           border-radius: 5px; /* Membuat sudut button melengkung */
+           transition: background-color 0.3s ease; /* Efek transisi warna latar belakang */
+        }
+
+        button:hover {
+           background-color: #45a049; /* Warna latar belakang lebih gelap saat hover */
+        }
+
     </style>
 </head>
 <body>
@@ -106,6 +122,9 @@
         </div>
 
         <button class="button" onclick="addOrUpdatePackage()">Tambah/Perbarui Paket</button>
+        <form action="/" method="GET">
+           <button type="submit">BERANDA</button>
+        </form>
 
         <div class="table-container">
             <h3>Daftar Paket</h3>
