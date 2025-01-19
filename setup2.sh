@@ -8,6 +8,12 @@ mkdir -p xl/templates/
 cd xl
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/app2.py
 
+cat <<EOL > run.sh
+#!/bin/bash
+source /root/xl/web/bin/activate
+python /root/xl/app2.py
+EOL
+
 cd templates
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/dashboard_xl.html
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/adminku.html
