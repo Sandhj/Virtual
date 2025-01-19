@@ -9,8 +9,8 @@ cd xl
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/app2.py
 
 cd templates
-wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/dashboard_xl.sh
-wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/adminadduser.sh
+wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/dashboard_xl.html
+wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/adminadduser.html
 
 cd
 cd xl
