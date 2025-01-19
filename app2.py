@@ -49,9 +49,9 @@ def delete_package(package_name):
     del packages[package_name]
     return jsonify({'message': 'Paket berhasil dihapus!'}), 200
 
-@app.route('/adminadduser', methods=['GET'])
+@app.route('/adminku', methods=['GET'])
 def admin_panel():
-    return render_template('adminadduser.html')
+    return render_template('adminku.html')
 
 @app.route('/')
 def home():
