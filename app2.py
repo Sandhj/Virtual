@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request, render_template
+@app.route('/dashboard_xl', methods=['POST'])
+def xl():
+    return render_template('dashboard_xl.html')
 
-app = Flask(__name__)
-
-# In-memory database untuk menyimpan daftar paket
-packages = {}
+@app.route('/adminku', methods=['GET'])
+def admin():
+    return render_template('adminku.html')
 
 @app.route('/get_packages', methods=['GET'])
 def get_packages():
@@ -49,14 +50,25 @@ def delete_package(package_name):
     del packages[package_name]
     return jsonify({'message': 'Paket berhasil dihapus!'}), 200
 
-@app.route('/adminku', methods=['GET'])
-def admin_panel():
-    return render_template('adminku.html')
+@app.route('/backup', methods=['POST'])
+def backup_packages():
+    try:
+        # Simpan data packages ke file JSON
+        with open(BACKUP_FILE, 'w') as file:
+            json.dump(packages, file, indent=4)
+        return jsonify({'message': 'Backup berhasil disimpan ke backup_packages.json'}), 200
+    except Exception as e:
+        return jsonify({'error': f'Gagal melakukan backup: {str(e)}'}), 500
 
-@app.route('/')
-def home():
-    return render_template('dashboard_xl.html')
- 
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5003, debug=True)
+@app.route('/restore', methods=['POST'])
+def restore_packages():
+    try:
+        # Baca data dari file backup dan kembalikan ke memory
+        global packages
+        with open(BACKUP_FILE, 'r') as file:
+            packages = json.load(file)
+        return jsonify({'message': 'Data berhasil dipulihkan dari backup.'}), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'File backup tidak ditemukan.'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Gagal memulihkan data: {str(e)}'}), 500
