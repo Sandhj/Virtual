@@ -10,7 +10,7 @@ wget -q https://raw.githubusercontent.com/Sandhj/project/main/app2.py
 
 cd templates
 wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/dashboard_xl.html
-wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/adminadduser.html
+wget -q https://raw.githubusercontent.com/Sandhj/project/main/templates/adminku.html
 
 cd
 cd xl
