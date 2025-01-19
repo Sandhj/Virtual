@@ -125,6 +125,10 @@
         <form action="/" method="GET">
            <button type="submit">BERANDA</button>
         </form>
+        <div class="form-group">
+           <button class="button" onclick="backupData()">Backup Data</button>
+           <button class="button" onclick="restoreData()">Restore Data</button>
+        </div>
 
         <div class="table-container">
             <h3>Daftar Paket</h3>
@@ -226,6 +230,22 @@
                         alert('Paket tidak ditemukan.');
                     }
                 });
+        }
+        function backupData() {
+        fetch('/backup', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => alert(data.message || data.error))
+            .catch(error => alert('Gagal melakukan backup.'));
+        }
+
+        function restoreData() {
+        fetch('/restore', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+                fetchPackages(); // Perbarui tabel setelah restore
+            })
+            .catch(error => alert('Gagal memulihkan data.'));
         }
 
         // Muat paket saat halaman dimuat
