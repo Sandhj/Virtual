@@ -103,7 +103,7 @@ def login():
 
 # Halaman admin untuk menambahkan password baru
 @app.route('/adminadduser', methods=['GET', 'POST'])
-def admin():
+def adminadduser():
     check_and_create_password_file()  # Pastikan file password.txt ada
 
     if request.method == 'POST':
