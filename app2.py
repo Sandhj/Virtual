@@ -51,11 +51,11 @@ def delete_package(package_name):
 
 @app.route('/adminku', methods=['GET'])
 def admin_panel():
-    return render_template('adminku.html')
+    return render_template('adminadduser.html')
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('dashboard_xl.html')
  
 
 if __name__ == '__main__':
