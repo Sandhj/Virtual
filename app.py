@@ -113,6 +113,14 @@ def admin():
         return redirect(url_for('login'))
 
     return render_template('adminadduser.html')
+
+# -------------- Dashboard -----------------
+@app.route('/dashboard', methods=['POST'])
+def dashboard():
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        return render_template('dashboard.html')
                 
 # ---------------Fungsi Create Account------------
 @app.route('/create_temp', methods=['GET', 'POST'])
