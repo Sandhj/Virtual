@@ -4,13 +4,15 @@ import os
 import subprocess
 import requests
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 packages = {}
 # Path file backup
 BACKUP_FILE = 'backup_packages.json'
+PASSWORD_FILE = 'password.txt'
+PASSWORD_EXPIRY_DAYS = 30
 
 #Fungsi kirim Data ke Bot Tele
 def send_telegram_notification(token, chat_id, message):
@@ -37,10 +39,81 @@ def data_result(protocol, username, expired, output):
     }
 
 # ------------------Funsgi awal web------------------
-@app.route('/')
-def login():
-    return render_template('dashboard.html')
 
+# Fungsi untuk memeriksa dan membuat password.txt jika belum ada
+def check_and_create_password_file():
+    if not os.path.exists(PASSWORD_FILE):
+        with open(PASSWORD_FILE, 'w') as file:
+            file.write("")  # Membuat file kosong jika belum ada
+        print("password.txt dibuat.")
+
+# Fungsi untuk membaca password dan tanggal dari file
+def read_passwords():
+    passwords = []
+    if os.path.exists(PASSWORD_FILE):
+        with open(PASSWORD_FILE, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                parts = line.strip().split(" ", 1)
+                if len(parts) == 2:
+                    password = parts[0]
+                    try:
+                        created_at = datetime.strptime(parts[1], "%Y-%m-%d")
+                        passwords.append((password, created_at))
+                    except ValueError:
+                        pass  # Abaikan jika format tanggal salah
+    return passwords
+
+# Fungsi untuk menambahkan password baru ke file
+def add_password(password):
+    with open(PASSWORD_FILE, 'a') as file:
+        file.write(f"{password} {datetime.now().strftime('%Y-%m-%d')}\n")
+
+# Halaman utama untuk login
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    check_and_create_password_file()  # Pastikan file password.txt ada
+
+    if request.method == 'POST':
+        entered_password = request.form['password']
+        passwords = read_passwords()
+
+        if not passwords:
+            flash('Password belum diatur. Harap hubungi administrator untuk pengaturan password.', 'error')
+            return redirect(url_for('login'))
+
+        # Cek apakah password valid dan masih berlaku
+        valid_password = False
+        for stored_password, created_at in passwords:
+            if entered_password == stored_password:
+                if datetime.now() <= created_at + timedelta(days=PASSWORD_EXPIRY_DAYS):
+                    valid_password = True
+                    break
+                else:
+                    flash('Password sudah kadaluarsa. Harap hubungi administrator.', 'error')
+                    break
+
+        if valid_password:
+            flash('Login berhasil!', 'success')
+            return render_template('dashboard.html')
+        else:
+            flash('Password salah!', 'error')
+
+    return render_template('login.html')
+
+# Halaman admin untuk menambahkan password baru
+@app.route('/adminadduser', methods=['GET', 'POST'])
+def admin():
+    check_and_create_password_file()  # Pastikan file password.txt ada
+
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        add_password(new_password)
+        flash('Password berhasil ditambahkan!', 'success')
+        return redirect(url_for('index'))
+
+    return render_template('admin.html')
+                
 # ---------------Fungsi Create Account------------
 @app.route('/create_temp', methods=['GET', 'POST'])
 def create_account_temp():
